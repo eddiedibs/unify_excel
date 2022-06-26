@@ -110,7 +110,7 @@ if __name__ == '__main__':
     #                      path_to_non_duplicates=f"{s.non_duplicates_path}/chacao_no_duplicados.xlsx")
     
     obj_1.import_df_data(path_of_curated_duplicates=f"{s.curated_duplicates_path}/test_duplicados_depurados.xlsx",
-                        path_of_non_duplicates=f"{s.non_duplicates_path}/chacao_no_duplicados.xlsx")
+                        path_of_non_duplicates=f"{s.non_duplicates_path}/test_no_duplicados.xlsx")
 
 
 ###########################################
