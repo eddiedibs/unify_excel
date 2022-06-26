@@ -1,106 +1,199 @@
 #!/home/edd1e/Desktop/stuff/work/programming_work/python_work/unify_excel/venv_unifyE/bin/python
 
-from audioop import mul
-from hashlib import new
 import settings as s
 import multiprocessing
 import ast
+import re
 
-
-# from openpyxl import load_workbook
 import openpyxl
 import xlsxwriter
 import pandas as pd
 
 
 
-# class document_handling:
 
-#     def __init__(self):
-#         pass
+class document_handling:
 
-
-#     def 
-
-excel_document = f"{s.excel_files_path}{s.document_files.get('unificacion')}"
-
-
-document_names = ["Clave", "CEDULA O RIF", "Nombre de cliente", "Cuenta Contrato", "Actividad Economica", "CNAE", 
-"Direccion Prestacion de Servicio", "Persona Contacto", "Municipio", "Tipo de Pago", "Tipo de Gestion", "Primary Phone", 
-"Secondary Phone",  "Telefono 3", "TEL REPRESENTANTE", "Primary Email", "Secondary Email", "Organization Name", 
-"Campaña", "Deuda Total", "Estatus de Campaña", "Lote", "Agrupado", "Telefono 4", "Tipo de Cliente", "Telefono Alt. 1", 
-"Telefono Alt. 2", "Email Alt.1", "Email Alt.2", "FECHA DE MODIFICACION", "Last Modified By", "Turno", "Turno New"]
-
-
-book = pd.read_excel(excel_document, sheet_name="maneiro")
-# book2 = pd.read_table(excel_document, sheet_name="iribarren", names=document_names)
-
-
-# book_to_modify = book.to_dict()
-cedula_col = book.iloc[:, 1]
-
-
-amount_of_duplicates = book.iloc[:, 1].duplicated(keep=False).sum()
-# duplicates = book.iloc[:, 1].duplicated(keep='first')
-book_with_only_cedula_duplicates = book.iloc[:, 1].duplicated(keep=False)
-
-# vals = [v for k, v in book.iloc[:, 1].to_dict().items()]
-duplicated_row_ids = [k for k, v in book_with_only_cedula_duplicates.to_dict().items() if v == True]
-
-book_with_no_cedula_duplicates = book.drop_duplicates(subset="CEDULA O RIF", keep=False)
-
-
-path_to_non_duplicates = 'non_duplicates.xlsx'
-book_with_no_cedula_duplicates.to_excel(path_to_non_duplicates, index=False)
-
-
-amount_of_rows = len(book.iloc[duplicated_row_ids])
-# for i in range(0, amount_of_rows):
-#     print(book.iloc[duplicated_row_ids[i]])
-
-def get_duplicated_df_data():
-
-    column = []
-    for row in range(0, amount_of_rows):
-        inserted_row = []
-        for col in book.iloc[duplicated_row_ids[row]]:
-            inserted_row.append(col)
-
-        column.append(inserted_row)
-
-    return column
-
-df_with_duplicated_rows = pd.DataFrame(data=get_duplicated_df_data(), columns=document_names)
-
-cedula_list = []
-for index, cedula in enumerate(df_with_duplicated_rows.iloc[:, 1]):
-    cedula_list.append(cedula)
-    # print(index, cedula)
-
-# print(f"[THE LIST BEFORE REMOVING DUPLICATES IS]...\n{cedula_list}\n\n")
-cedula_list = list(set(cedula_list)) 
-# print(f"[THE LIST AFTER REMOVING DUPLICATES IS]...\n{cedula_list}\n\n")
-
-
-def get_cleaned_data_to_df(data_to_dataframe):
-
-
-    cleaned_data = pd.DataFrame(data=get_duplicated_df_data(), columns=document_names)
-    return cleaned_data
+    def __init__(self, document_name:str, document_columns:list, sheet_name:str=None, document_path:str=f"{s.excel_files_path}/"):
+        
+        
+        self.document_name = document_name
+        self.excel_document = f"{document_path}{document_name}"
+        self.book = pd.read_excel(f'{self.excel_document}')
+        self.document_columns = document_columns
 
 
 
-def check_row_columns(cedula):
+
+
+    def get_duplicated_df_data(self):
+        cedula_column = self.book.iloc[:, 1]
+        book_with_only_cedula_duplicates = cedula_column.duplicated(keep=False)
+        duplicated_row_ids = [k for k, v in book_with_only_cedula_duplicates.to_dict().items() if v == True]
+        amount_of_rows = len(self.book.iloc[duplicated_row_ids])
+
+        column = []
+        for row in range(0, amount_of_rows):
+            inserted_row = []
+            for col in self.book.iloc[duplicated_row_ids[row]]:
+                inserted_row.append(col)
+
+            column.append(inserted_row)
+
+        return column
+
+
+    def export_df_data(self, path_to_duplicates, path_to_non_duplicates, input_file_name):
+
+
+       
+
+        print(f"[EXPORTING DATAFRAMES FROM INPUT FILE '{input_file_name}']...\n [FILE LOCATED AT '{self.excel_document}']\n\n\n")
+
+        df_with_duplicated_rows = pd.DataFrame(data=self.get_duplicated_df_data(), columns=self.document_columns)
+        df_with_duplicated_rows.to_excel(path_to_duplicates, index=False)
+        print(f"[DATAFRAME WITH DUPLICATED ROWS HAS BEEN CREATED AND EXPORTED TO {path_to_duplicates}]\n")
+
+        book_with_only_cedula_duplicates = self.book.iloc[:, 1].duplicated(keep=False)
+
+        duplicated_row_ids = [k for k, v in book_with_only_cedula_duplicates.to_dict().items() if v == True]
+        
+        cedulas_column_name = self.book.columns[1]
+
+        book_with_no_cedula_duplicates = self.book.drop_duplicates(subset=f"{cedulas_column_name}", keep=False)
+
+
+        book_with_no_cedula_duplicates.to_excel(path_to_non_duplicates, index=False)
+        print(f"[DATAFRAME WITH NON-DUPLICATED ROWS HAS BEEN CREATED AND EXPORTED TO {path_to_non_duplicates}]\n")
+
+
+
+
+    def import_df_data(self, path_of_curated_duplicates, path_of_non_duplicates):
+        
+      
+        is_file_extension = re.search(".xlsx", self.document_name) 
+
+        if is_file_extension:
+
+            pass
+        
+        else:
+            self.document_name = f"{self.document_name}.xlsx"
+      
+      
+        print("[READING DATAFRAMES] ...\n")
+        curated_duplicates_file = pd.read_excel(f'{path_of_curated_duplicates}')
+        to_merge_file = pd.read_excel(f'{path_of_non_duplicates}')
+        curated_duplicates_file.columns = s.document_columns
+        to_merge_file.columns = s.document_columns
+
+
+        print("[PROCEDING TO MERGE DATAFRAMES] ...\n")
+        result_file = pd.concat([curated_duplicates_file, to_merge_file], sort=False)
+
+        result_file_path = f"{s.excel_files_path}/result_{self.document_name}"
+
+        result_file.to_excel(result_file_path, index=False)
+
+        print("[MERGING COMPLETED!] ...\n")
+        
+
+
+
+if __name__ == '__main__':
+    obj_1 = document_handling(document_path=f"{s.excel_files_path}/",
+                            document_name="chacao.xlsx", 
+                            document_columns=s.document_columns)
+    
+    # obj_1.export_df_data(path_to_duplicates=f"{s.duplicates_path}/chacao_duplicados.xlsx",
+    #                      path_to_non_duplicates=f"{s.non_duplicates_path}/chacao_no_duplicados.xlsx")
+    
+    obj_1.import_df_data(path_of_curated_duplicates=f"{s.curated_duplicates_path}/chacao_duplicados_depurados.xlsx",
+                        path_of_non_duplicates=f"{s.non_duplicates_path}/chacao_no_duplicados.xlsx")
+
+
+###########################################
+# TO PASS TO 'document_handling' instance:#
+###########################################
+
+    # excel_document = f"{s.excel_files_path}{s.document_files.get('unificacion')}"
+    # self.book = pd.read_excel('chacao.xlsx')
+    # sheet_name(Optional)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+######################################################################################################################################################
+
+
+# def get_cleaned_data_to_df(data_to_dataframe):
+
+
+#     cleaned_data = pd.DataFrame(data=get_duplicated_df_data(), columns=self.document_columns)
+#     return cleaned_data
+
+
+
+# def check_row_columns(cedula):
     # duplicated_cedula_row = df_with_duplicated_rows.loc[df_with_duplicated_rows[:, 1] == cedula]
-    duplicated_cedula_row = df_with_duplicated_rows.loc[df_with_duplicated_rows.iloc[:, 1] == cedula]
+    # duplicated_cedula_row = df_with_duplicated_rows.loc[df_with_duplicated_rows.iloc[:, 1] == cedula]
     # print(f"[LAS COLUMNAS DE LA FILA DE CEDULA {cedula} VAN A SER PROCESADAS] Chequeando...\n")
     # print(duplicated_cedula_row.iloc[:, 11])
-    # for item in document_names:
+    # for item in self.document_columns:
     #     get_cleaned_data_to_df(duplicated_cedula_row.to_dict().get(item))
-    for item in document_names:
-        if item != ''
-        list_of_cleaned_values = [v for k, v in duplicated_cedula_row.to_dict().get(item).items()]
-        get_cleaned_data_to_df(list_of_cleaned_values)
+    # for item in self.document_columns:
+    #     if item != ''
+    #     list_of_cleaned_values = [v for k, v in duplicated_cedula_row.to_dict().get(item).items()]
+    #     get_cleaned_data_to_df(list_of_cleaned_values)
 
 
 
@@ -108,19 +201,25 @@ def check_row_columns(cedula):
 #     row_position = [k for k, v in dataframe.to_dict().items() if v == value]
 #     return row_position
 
-def find_duplicated_rows():
-    for i in range(0, len(cedula_list)):
-        for index, cedula in enumerate(df_with_duplicated_rows.iloc[:, 1]):
-            if cedula == cedula_list[i]:
-                print(f"[{cedula} is EQUAL to {cedula_list[i]}] checking columns...\n")
-                check_row_columns(df_with_duplicated_rows.iloc[:, 1][index])
-                break
-            elif cedula != cedula_list[i]:
-                print(f"[{cedula} is NOT equal to {cedula_list[i]}] Next Cedula...\n")
+# def find_duplicated_rows():
+#     cedula_list = []
+#     for index, cedula in enumerate(df_with_duplicated_rows.iloc[:, 1]):
+#         cedula_list.append(cedula)
+
+#     cedula_list = list(set(cedula_list)) 
+
+#     for i in range(0, len(cedula_list)):
+#         for index, cedula in enumerate(df_with_duplicated_rows.iloc[:, 1]):
+#             if cedula == cedula_list[i]:
+#                 print(f"[{cedula} is EQUAL to {cedula_list[i]}] checking columns...\n")
+#                 check_row_columns(df_with_duplicated_rows.iloc[:, 1][index])
+#                 break
+#             elif cedula != cedula_list[i]:
+#                 print(f"[{cedula} is NOT equal to {cedula_list[i]}] Next Cedula...\n")
 
 
 
-find_duplicated_rows()
+# find_duplicated_rows()
 
 # print(df_with_duplicated_rows.iloc[:, 1])
 
@@ -136,8 +235,8 @@ find_duplicated_rows()
 # final_keys = list(map(lambda x: x+2, duplicated_row_ids))
 # print(final_keys)   
 
-# first_row = book.loc[duplicated_row_ids[0]]
-# sec_col = book.iloc[duplicated_row_ids[0]]
+# first_row = self.book.loc[duplicated_row_ids[0]]
+# sec_col = self.book.iloc[duplicated_row_ids[0]]
 
 # print(duplicated_row_ids[0])
 
