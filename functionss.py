@@ -103,13 +103,13 @@ class document_handling:
 
 if __name__ == '__main__':
     obj_1 = document_handling(document_path=f"{s.excel_files_path}/",
-                            document_name="chacao.xlsx", 
+                            document_name="test.xlsx", 
                             document_columns=s.document_columns)
     
     # obj_1.export_df_data(path_to_duplicates=f"{s.duplicates_path}/chacao_duplicados.xlsx",
     #                      path_to_non_duplicates=f"{s.non_duplicates_path}/chacao_no_duplicados.xlsx")
     
-    obj_1.import_df_data(path_of_curated_duplicates=f"{s.curated_duplicates_path}/chacao_duplicados_depurados.xlsx",
+    obj_1.import_df_data(path_of_curated_duplicates=f"{s.curated_duplicates_path}/test_duplicados_depurados.xlsx",
                         path_of_non_duplicates=f"{s.non_duplicates_path}/chacao_no_duplicados.xlsx")
 
 
@@ -118,7 +118,7 @@ if __name__ == '__main__':
 ###########################################
 
     # excel_document = f"{s.excel_files_path}{s.document_files.get('unificacion')}"
-    # self.book = pd.read_excel('chacao.xlsx')
+    # self.book = pd.read_excel('test.xlsx')
     # sheet_name(Optional)
 
 
