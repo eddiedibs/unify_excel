@@ -28,8 +28,11 @@ document_columns = ["Clave", "CEDULA O RIF", "Nombre de cliente", "Cuenta Contra
 duplicates_path = f'{root_path}/excel_files/regiones/duplicados'
 curated_duplicates_path = f'{root_path}/excel_files/regiones/duplicados_unificados'
 
+depurated_results = f'{root_path}/excel_files/regiones/depurado'
 
 non_duplicates_path = f'{root_path}/excel_files/regiones/no_duplicados'
+
+united_depurated_path = f'{root_path}/excel_files/completos_unificados'
 
 
 

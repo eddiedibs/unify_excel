@@ -2,13 +2,14 @@
 
 import settings as s
 import multiprocessing
+import os
 import ast
 import re
+
 
 import openpyxl
 import xlsxwriter
 import pandas as pd
-
 
 
 
@@ -97,8 +98,43 @@ class document_handling:
         result_file.to_excel(result_file_path, index=False)
 
         print("[MERGING COMPLETED!] ...\n")
+
+
+
+
+class unify_files:
+
+    def __init__(self):
+        pass
+
+    def merge_regions(self, path_of_xlsx_files, result_path, name_of_final_document):
+
+
+        print(f"[UNIFYING ALL XLSX FILES IN '{path_of_xlsx_files}']...\n")
+        final_document_path = f"{result_path}/{name_of_final_document}"
+        final_document = pd.ExcelWriter(f"{final_document_path}", engine = 'xlsxwriter')
         
 
+
+
+        for f in os.listdir(path_of_xlsx_files):
+            print("[LISTING ALL VALIDATED XLSX FILES]...\n")
+            contains_ext = re.search(".xlsx", f)
+            if contains_ext:
+                    path_of_sheet = f"{path_of_xlsx_files}/{f}"
+                    print(f"[SETTING RESULT FILE AT {path_of_sheet}]...\n")
+                    xlsx_file = pd.read_excel(f"{path_of_sheet}")
+
+
+                    xlsx_file_name = f.split('.xlsx')[0]
+                    print(f"[SAVING SHEET OF NAME {xlsx_file_name} to {final_document_path}]...\n")
+                    xlsx_file.to_excel(final_document, sheet_name=f"{f.split('.xlsx')[0]}")
+
+            else:
+                pass
+        final_document.save()
+        final_document.close()
+            
 
 
 if __name__ == '__main__':

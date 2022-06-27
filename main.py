@@ -20,6 +20,7 @@ class module_prompt:
             description="Handle Excel files and some more...")
         p.add_argument("-d", "--divide", metavar='<input_file>', type=str, help='Divide an excel file into a duplicates dataframe, and one without duplicate.')
         p.add_argument("-m", "--merge", metavar='', type=str, help='Merges both duplicate and non-duplicate excel files into one.')
+        p.add_argument("-g", "--getfinal", metavar='', type=str, help='Adds all files in the specified path in settings into sheets for one document')
         p.add_argument("-l", "--list", metavar='[exf, dup, nondup]', type=str, help='Lists document files.')
         args = p.parse_args()
 
@@ -57,7 +58,12 @@ class module_prompt:
                 list_process = subprocess.run(f'ls {s.duplicates_path}', shell=True)
 
 
+            elif args.getfinal:
 
+                driver = func.unify_files()
+
+
+                driver.merge_regions(s.depurated_results, s.united_depurated_path, args.getfinal)
 
 
         except KeyboardInterrupt:
