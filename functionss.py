@@ -20,7 +20,6 @@ class document_handling:
         
         self.document_name = document_name
         self.excel_document = f"{document_path}{document_name}"
-        self.book = pd.read_excel(f'{self.excel_document}')
         self.document_columns = document_columns
 
 
@@ -28,7 +27,7 @@ class document_handling:
 
 
     def get_duplicated_df_data(self):
-        cedula_column = self.book.iloc[:, 1]
+        cedula_column = self.book.iloc[:, 0]
         book_with_only_cedula_duplicates = cedula_column.duplicated(keep=False)
         duplicated_row_ids = [k for k, v in book_with_only_cedula_duplicates.to_dict().items() if v == True]
         amount_of_rows = len(self.book.iloc[duplicated_row_ids])
@@ -46,7 +45,7 @@ class document_handling:
 
     def export_df_data(self, path_to_duplicates, path_to_non_duplicates, input_file_name):
 
-
+        self.book = pd.read_excel(f'{self.excel_document}')
        
 
         print(f"[EXPORTING DATAFRAMES FROM INPUT FILE '{input_file_name}']...\n [FILE LOCATED AT '{self.excel_document}']\n\n\n")
@@ -55,11 +54,11 @@ class document_handling:
         df_with_duplicated_rows.to_excel(path_to_duplicates, index=False)
         print(f"[DATAFRAME WITH DUPLICATED ROWS HAS BEEN CREATED AND EXPORTED TO {path_to_duplicates}]\n")
 
-        book_with_only_cedula_duplicates = self.book.iloc[:, 1].duplicated(keep=False)
+        book_with_only_cedula_duplicates = self.book.iloc[:, 0].duplicated(keep=False)
 
         duplicated_row_ids = [k for k, v in book_with_only_cedula_duplicates.to_dict().items() if v == True]
         
-        cedulas_column_name = self.book.columns[1]
+        cedulas_column_name = self.book.columns[0]
 
         book_with_no_cedula_duplicates = self.book.drop_duplicates(subset=f"{cedulas_column_name}", keep=False)
 
@@ -72,7 +71,8 @@ class document_handling:
 
     def import_df_data(self, path_of_curated_duplicates, path_of_non_duplicates):
         
-      
+
+        
         is_file_extension = re.search(".xlsx", self.document_name) 
 
         if is_file_extension:
@@ -83,14 +83,14 @@ class document_handling:
             self.document_name = f"{self.document_name}.xlsx"
       
       
-        print("[READING DATAFRAMES] ...\n")
+        print(f"[READING DATAFRAMEs] ...\n[{path_of_curated_duplicates}]\n[{path_of_non_duplicates}]\n")
         curated_duplicates_file = pd.read_excel(f'{path_of_curated_duplicates}')
         to_merge_file = pd.read_excel(f'{path_of_non_duplicates}')
         curated_duplicates_file.columns = s.document_columns
         to_merge_file.columns = s.document_columns
 
 
-        print("[PROCEDING TO MERGE DATAFRAMES] ...\n")
+        print(f"[PROCEDING TO MERGE DATAFRAMES to {s.excel_files_path}/result_{self.document_name}] ...\n")
         result_file = pd.concat([curated_duplicates_file, to_merge_file], sort=False)
 
         result_file_path = f"{s.excel_files_path}/result_{self.document_name}"
@@ -107,34 +107,66 @@ class unify_files:
     def __init__(self):
         pass
 
-    def merge_regions(self, path_of_xlsx_files, result_path, name_of_final_document):
+    def concat_files(self, path_of_xlsx_files, result_path, name_of_final_document, reason):
 
 
-        print(f"[UNIFYING ALL XLSX FILES IN '{path_of_xlsx_files}']...\n")
-        final_document_path = f"{result_path}/{name_of_final_document}"
-        final_document = pd.ExcelWriter(f"{final_document_path}", engine = 'xlsxwriter')
-        
+        if reason == 'concat_sheet':
 
-
-
-        for f in os.listdir(path_of_xlsx_files):
-            print("[LISTING ALL VALIDATED XLSX FILES]...\n")
-            contains_ext = re.search(".xlsx", f)
-            if contains_ext:
-                    path_of_sheet = f"{path_of_xlsx_files}/{f}"
-                    print(f"[SETTING RESULT FILE AT {path_of_sheet}]...\n")
-                    xlsx_file = pd.read_excel(f"{path_of_sheet}")
-
-
-                    xlsx_file_name = f.split('.xlsx')[0]
-                    print(f"[SAVING SHEET OF NAME {xlsx_file_name} to {final_document_path}]...\n")
-                    xlsx_file.to_excel(final_document, sheet_name=f"{f.split('.xlsx')[0]}")
-
-            else:
-                pass
-        final_document.save()
-        final_document.close()
+            print(f"[UNIFYING ALL XLSX FILES IN '{path_of_xlsx_files}']...\n")
+            final_document_path = f"{result_path}/{name_of_final_document}"
+            final_document = pd.ExcelWriter(f"{final_document_path}", engine = 'xlsxwriter')
             
+
+
+
+            for f in os.listdir(path_of_xlsx_files):
+                print("[LISTING ALL VALIDATED XLSX FILES]...\n")
+                contains_ext = re.search(".xlsx", f)
+                if contains_ext:
+                        path_of_sheet = f"{path_of_xlsx_files}/{f}"
+                        print(f"[SETTING RESULT FILE AT {path_of_sheet}]...\n")
+                        xlsx_file = pd.read_excel(f"{path_of_sheet}")
+
+
+                        # xlsx_file_name = f.split('.xlsx')[0]
+                        # print(f"[SAVING SHEET OF NAME {xlsx_file_name} to {final_document_path}]...\n")
+                        # xlsx_file.to_excel(final_document, sheet_name=f"{xlsx_file_name}")
+
+                else:
+                    pass
+            final_document.save()
+            final_document.close()
+            
+
+        elif reason == 'concat_whole':
+
+
+            print(f"[UNIFYING ALL XLSX FILES IN '{path_of_xlsx_files}']...\n")
+            final_document_path = f"{result_path}/{name_of_final_document}"
+            final_document = pd.ExcelWriter(f"{final_document_path}", engine = 'xlsxwriter')
+            
+
+            df = pd.read_excel(f"{path_of_xlsx_files}/Contactos_VTIGER_segmentado.xlsx", None);
+            print(df.keys())    
+
+            # for f in os.listdir(path_of_xlsx_files):
+            #     print("[LISTING ALL VALIDATED XLSX FILES]...\n")
+            #     contains_ext = re.search(".xlsx", f)
+            #     if contains_ext:
+            #             path_of_sheet = f"{path_of_xlsx_files}/{f}"
+            #             print(f"[SETTING RESULT FILE AT {path_of_sheet}]...\n")
+            #             xlsx_file = pd.read_excel(f"{path_of_sheet}")
+
+
+            #             # xlsx_file_name = f.split('.xlsx')[0]
+            #             # print(f"[SAVING SHEET OF NAME {xlsx_file_name} to {final_document_path}]...\n")
+            #             # xlsx_file.to_excel(final_document, sheet_name=f"{xlsx_file_name}")
+
+            #     else:
+            #         pass
+            # final_document.save()
+            # final_document.close()
+
 
 
 if __name__ == '__main__':

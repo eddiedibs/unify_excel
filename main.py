@@ -20,8 +20,9 @@ class module_prompt:
             description="Handle Excel files and some more...")
         p.add_argument("-d", "--divide", metavar='<input_file>', type=str, help='Divide an excel file into a duplicates dataframe, and one without duplicate.')
         p.add_argument("-m", "--merge", metavar='', type=str, help='Merges both duplicate and non-duplicate excel files into one.')
-        p.add_argument("-g", "--getfinal", metavar='', type=str, help='Adds all files in the specified path in settings into sheets for one document')
-        p.add_argument("-l", "--list", metavar='[exf, dup, nondup]', type=str, help='Lists document files.')
+        p.add_argument("-aS", "--add-sheets", nargs=3, metavar='', type=str, help='Adds all files in the specified path into sheets for one document [xlsxs=, res_path=, f_name=]')
+        p.add_argument("-cD", "--concat-docs", nargs=3, metavar='', type=str, help='Adds all files in the specified path into one whole document [xlsxs=, res_path=, f_name=]')
+        p.add_argument("-l", "--list", metavar='[exf, dup, nondup]', choices=['exf', 'dup', 'nondup'], type=str, help='Lists document files.')
         args = p.parse_args()
 
 
@@ -29,8 +30,9 @@ class module_prompt:
         try:
 
             if args.divide:
+                # opt_args = {'xlsxs_path': args.add_sheets[0].split("=")[1],
+                #             'f_name': args.add_sheets[2].split("=")[1]}
 
-                # print(s.root_path)
                 driver = func.document_handling(document_name=f"{args.divide}", 
                             document_columns=s.document_columns)
                 driver.export_df_data(input_file_name=args.divide,
@@ -58,12 +60,34 @@ class module_prompt:
                 list_process = subprocess.run(f'ls {s.duplicates_path}', shell=True)
 
 
-            elif args.getfinal:
-
-                driver = func.unify_files()
+            elif args.add_sheets:
 
 
-                driver.merge_regions(s.depurated_results, s.united_depurated_path, args.getfinal)
+                if args.add_sheets[0].split("=")[0] == 'xlsxs' and args.add_sheets[1].split("=")[0] == 'res_path' and args.add_sheets[2].split("=")[0] == 'f_name':
+                    driver = func.unify_files()
+
+                    opt_args = {'xlsxs_path': args.add_sheets[0].split("=")[1],
+                                'res_path': args.add_sheets[1].split("=")[1],
+                                'f_name': args.add_sheets[2].split("=")[1]}
+
+
+
+                    driver.concat_files(opt_args.get("xlsxs_path"), opt_args.get("res_path"), opt_args.get("f_name"), 'concat_sheet')
+        
+
+            elif args.concat_docs:
+
+                if args.concat_docs[0].split("=")[0] == 'xlsxs' and args.concat_docs[1].split("=")[0] == 'res_path' and args.concat_docs[2].split("=")[0] == 'f_name':
+                    driver = func.unify_files()
+
+                    opt_args = {'xlsxs_path': args.concat_docs[0].split("=")[1],
+                                'res_path': args.concat_docs[1].split("=")[1],
+                                'f_name': args.concat_docs[2].split("=")[1]}
+
+
+
+                    driver.concat_files(opt_args.get("xlsxs_path"), opt_args.get("res_path"), opt_args.get("f_name"), 'concat_whole')
+
 
 
         except KeyboardInterrupt:
@@ -71,6 +95,10 @@ class module_prompt:
 
         except FileNotFoundError as FileErr:
             print(f"[NO SUCH FILE OR DIRECTORY] {FileErr}\n")
+
+
+        except IndexError:
+            print(dir(IndexError.with_traceback))
 
 
 if __name__ == '__main__':
