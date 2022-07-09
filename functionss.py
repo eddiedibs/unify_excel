@@ -18,18 +18,26 @@ class document_handling:
     def __init__(self, document_name:str, document_columns:list, sheet_name:str=None, document_path:str=f"{s.excel_files_path}/"):
         
         
-        self.document_name = document_name
-        self.excel_document = f"{document_path}{document_name}"
+        self.document_name = document_name.split('/')[-1]
+        self.excel_document = f"{document_name}"
         self.document_columns = document_columns
 
 
 
 
 
-    def get_duplicated_df_data(self):
-        cedula_column = self.book.iloc[:, 0]
-        book_with_only_cedula_duplicates = cedula_column.duplicated(keep=False)
-        duplicated_row_ids = [k for k, v in book_with_only_cedula_duplicates.to_dict().items() if v == True]
+    # ========================================================================================
+
+
+        #Get all duplicated data and return the columns along with their respective rows
+   
+   
+    # ========================================================================================
+    
+    def get_duplicated_df_data(self, column_id):
+        issued_column = self.book.iloc[:, column_id]
+        book_with_only_column_duplicates = issued_column.duplicated(keep=False)
+        duplicated_row_ids = [k for k, v in book_with_only_column_duplicates.to_dict().items() if v == True]
         amount_of_rows = len(self.book.iloc[duplicated_row_ids])
 
         column = []
@@ -42,28 +50,42 @@ class document_handling:
 
         return column
 
+    # ========================================================================================
 
-    def export_df_data(self, path_to_duplicates, path_to_non_duplicates, input_file_name):
+
+        # Divide an excel file into one duplicates dataframe, and another one without duplicate.
+   
+   
+    # ========================================================================================
+    def export_df_data(self, path_to_duplicates, path_to_non_duplicates, column_id=None):
 
         self.book = pd.read_excel(f'{self.excel_document}')
        
+        print("[SELECT THE KEY COLUMN TO CHECK FOR DUPLICATES]\n")
+        for index, col in enumerate(self.book.columns):
+            print(f"[{index}] {col}")
 
-        print(f"[EXPORTING DATAFRAMES FROM INPUT FILE '{input_file_name}']...\n [FILE LOCATED AT '{self.excel_document}']\n\n\n")
 
-        df_with_duplicated_rows = pd.DataFrame(data=self.get_duplicated_df_data(), columns=self.document_columns)
+
+        column_id = int(input("\n>>>")) 
+
+
+        print(f"[EXPORTING DATAFRAMES FROM INPUT FILE '{self.document_name}']...\n [FILE LOCATED AT '{self.excel_document}']\n\n\n")
+
+        df_with_duplicated_rows = pd.DataFrame(data=self.get_duplicated_df_data(column_id), columns=self.document_columns)
         df_with_duplicated_rows.to_excel(path_to_duplicates, index=False)
         print(f"[DATAFRAME WITH DUPLICATED ROWS HAS BEEN CREATED AND EXPORTED TO {path_to_duplicates}]\n")
 
-        book_with_only_cedula_duplicates = self.book.iloc[:, 0].duplicated(keep=False)
+        book_with_only_column_duplicates = self.book.iloc[:, column_id].duplicated(keep=False)
 
-        duplicated_row_ids = [k for k, v in book_with_only_cedula_duplicates.to_dict().items() if v == True]
+        duplicated_row_ids = [k for k, v in book_with_only_column_duplicates.to_dict().items() if v == True]
         
-        cedulas_column_name = self.book.columns[0]
+        issued_column_name = self.book.columns[column_id]
 
-        book_with_no_cedula_duplicates = self.book.drop_duplicates(subset=f"{cedulas_column_name}", keep=False)
+        book_without_duplicates = self.book.drop_duplicates(subset=f"{issued_column_name}", keep=False)
 
 
-        book_with_no_cedula_duplicates.to_excel(path_to_non_duplicates, index=False)
+        book_without_duplicates.to_excel(path_to_non_duplicates, index=False)
         print(f"[DATAFRAME WITH NON-DUPLICATED ROWS HAS BEEN CREATED AND EXPORTED TO {path_to_non_duplicates}]\n")
 
 
@@ -106,6 +128,9 @@ class unify_files:
 
     def __init__(self):
         pass
+
+
+
 
     def concat_files(self, path_of_xlsx_files, result_path, name_of_final_document, reason):
 
@@ -335,13 +360,13 @@ if __name__ == '__main__':
 # def checkID(index):
 #     file = open('text.tmp', 'r')
 #     cedula = file.readline()
-#     if cedula_column[index] == cedula:
-#         print(f"{cedula_column[index]} ES IGUAL A {cedula}")
+#     if issued_column[index] == cedula:
+#         print(f"{issued_column[index]} ES IGUAL A {cedula}")
 #         file.close()
 #         return True
 
 #     else:
-#         print(f"{cedula_column[index]} NO ES IGUAL A {cedula}")
+#         print(f"{issued_column[index]} NO ES IGUAL A {cedula}")
 #         file.close()
 #         return False
 
@@ -350,14 +375,14 @@ if __name__ == '__main__':
 
 # if __name__ == '__main__':
 #     count = 0
-#     for entry in range(len(cedula_column)):
+#     for entry in range(len(issued_column)):
 #         file = open('text.tmp', 'w')
-#         file.write(cedula_column[entry])
+#         file.write(issued_column[entry])
 #         print("[LA CEDULA HA SIDO ESCRITA] Chequeando...\n")
 #         file.close()
 
 #         p = multiprocessing.Pool()
-#         result = p.map(checkID, range(0, len(list(cedula_column))))
+#         result = p.map(checkID, range(0, len(list(issued_column))))
 
 #         with open('text.tmp', 'r') as f:
 #             print(f'[EL PROCESO HA ACABADO USANDO LA CEDULA {f.readline()}]\n\n')

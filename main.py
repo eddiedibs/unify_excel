@@ -18,7 +18,7 @@ class module_prompt:
         p = argparse.ArgumentParser(
             prog="unify_excel",
             description="Handle Excel files and some more...")
-        p.add_argument("-d", "--divide", metavar='<input_file>', type=str, help='Divide an excel file into a duplicates dataframe, and one without duplicate.')
+        p.add_argument("-d", "--divide", metavar='<input_file>', type=str, help='Divide an excel file into one duplicates dataframe, and another one without duplicate.')
         p.add_argument("-m", "--merge", metavar='', type=str, help='Merges both duplicate and non-duplicate excel files into one.')
         p.add_argument("-aS", "--add-sheets", nargs=3, metavar='', type=str, help='Adds all files in the specified path into sheets for one document [xlsxs=, res_path=, f_name=]')
         p.add_argument("-cD", "--concat-docs", nargs=3, metavar='', type=str, help='Adds all files in the specified path into one whole document [xlsxs=, res_path=, f_name=]')
@@ -30,22 +30,23 @@ class module_prompt:
         try:
 
             if args.divide:
-                # opt_args = {'xlsxs_path': args.add_sheets[0].split("=")[1],
-                #             'f_name': args.add_sheets[2].split("=")[1]}
+
+                file_name = args.divide.split('/')[-1]
 
                 driver = func.document_handling(document_name=f"{args.divide}", 
                             document_columns=s.document_columns)
-                driver.export_df_data(input_file_name=args.divide,
-                                    path_to_duplicates=f"{s.duplicates_path}/{args.divide.split('.xlsx')[0]}_duplicados.xlsx",
-                                    path_to_non_duplicates=f"{s.non_duplicates_path}/{args.divide.split('.xlsx')[0]}_no_duplicados.xlsx")
+                driver.export_df_data(path_to_duplicates=f"{s.duplicates_path}/{file_name.split('.xlsx')[0]}_duplicados.xlsx",
+                                    path_to_non_duplicates=f"{s.non_duplicates_path}/{file_name.split('.xlsx')[0]}_no_duplicados.xlsx")
 
             elif args.merge:
+
+                file_name = args.divide.split('/')[-1]
 
                 driver = func.document_handling(document_name=f"{args.merge}", 
                             document_columns=s.document_columns)
 
-                driver.import_df_data(path_of_curated_duplicates=f"{s.curated_duplicates_path}/{args.merge.split('.xlsx')[0]}_duplicados_depurados.xlsx",
-                        path_of_non_duplicates=f"{s.non_duplicates_path}/{args.merge.split('.xlsx')[0]}_no_duplicados.xlsx")
+                driver.import_df_data(path_of_curated_duplicates=f"{s.curated_duplicates_path}/{file_name.split('.xlsx')[0]}_duplicados_depurados.xlsx",
+                        path_of_non_duplicates=f"{s.non_duplicates_path}/{file_name.split('.xlsx')[0]}_no_duplicados.xlsx")
 
 
 

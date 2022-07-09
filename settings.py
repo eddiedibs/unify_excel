@@ -16,7 +16,7 @@ from pathlib import Path
 
 root_path = Path(__file__).resolve().parent
 
-excel_files_path = f'{root_path}/excel_files/regiones'
+excel_files_path = f'{root_path}/excel_files'
 
 
 # document_columns = ["Clave", "CEDULA O RIF", "Nombre de cliente", "Cuenta Contrato", "Actividad Economica", "CNAE", 
