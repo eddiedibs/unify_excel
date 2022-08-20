@@ -1,5 +1,6 @@
 #!/home/edd1e/Desktop/stuff/work/programming_work/python_work/unify_excel/venv_unifyE/bin/python
 
+from tempfile import TemporaryFile
 import settings as s
 import multiprocessing
 import os
@@ -91,7 +92,75 @@ class document_handling:
 
 
 
-    def import_df_data(self, path_of_curated_duplicates, path_of_non_duplicates):
+
+    # ========================================================================================
+
+
+        # Curates a specified dataframe from all its duplicates and saves it to a excel file.
+   
+   
+    # ========================================================================================
+
+
+    def curate_duplicates(self, path_to_curated_file):
+
+        # try:
+            
+        self.book = pd.read_excel(f'{self.excel_document}')
+        
+        # SELECT RANGE AND CHOOSE KEY COLUMN WITH DUPLICATE RECORDS #
+        print("[SELECT RANGE AND CHOOSE KEY COLUMN WITH DUPLICATE RECORDS (please insert values with spaces)]\n")
+        for index, col in enumerate(self.book.columns):
+            print(f"[{index}] {col}")
+
+        key_column_id = input("\n>>>")
+
+
+
+        # CHOOSE KEY COLUMNS WITH VALUES TO MERGE #
+        print("[CHOOSE KEY COLUMNS WITH VALUES TO MERGE (please insert values with spaces)]\n")
+        for index, col in enumerate(self.book.columns):
+            print(f"[{index}] {col}")
+        
+
+        columns_to_merge = input("\n>>>")
+        columns_to_merge = columns_to_merge.split()
+
+        
+        key_column = self.book.iloc[:, key_column_id]
+
+        for key, value in key_column.iteritems():
+            print(key, value)
+
+
+
+
+        # for id in columns_to_merge:
+
+
+
+
+
+
+        # except Exception as ex:
+        #     print(ex)
+
+
+
+
+
+
+
+    # ========================================================================================
+
+
+        # Merges both curated and non-duplicate excel files into one.
+   
+   
+    # ========================================================================================
+
+
+    def merge_duplicate_and_nonduplicate(self, path_of_curated_duplicates, path_of_non_duplicates):
         
 
         
@@ -202,7 +271,7 @@ if __name__ == '__main__':
     # obj_1.export_df_data(path_to_duplicates=f"{s.duplicates_path}/chacao_duplicados.xlsx",
     #                      path_to_non_duplicates=f"{s.non_duplicates_path}/chacao_no_duplicados.xlsx")
     
-    obj_1.import_df_data(path_of_curated_duplicates=f"{s.curated_duplicates_path}/test_duplicados_depurados.xlsx",
+    obj_1.merge_duplicate_and_nonduplicate(path_of_curated_duplicates=f"{s.united_duplicates_path}/test_duplicados_depurados.xlsx",
                         path_of_non_duplicates=f"{s.non_duplicates_path}/test_no_duplicados.xlsx")
 
 

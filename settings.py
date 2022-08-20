@@ -49,14 +49,16 @@ document_columns = ["RIF", "RAZON SOCIAL", "CEDULA",
  "TELF 4", "TIPO DE CLIENTE", "TLF ALT 1", "TLF ART 2", "EMAIL ART 1", "EMAIL ART 2", "FECHA DE MODIFICACION",
  "LAST MODIFIED BY ", "TURNO", "TURNO NEW"]
 
-duplicates_path = f'{root_path}/excel_files/regiones/duplicados'
-curated_duplicates_path = f'{root_path}/excel_files/regiones/duplicados_unificados'
+duplicates_path = f'{root_path}/excel_files/duplicados'
 
-depurated_results = f'{root_path}/excel_files/regiones/depurado'
+non_duplicates_path = f'{root_path}/excel_files/no_duplicados'
 
-non_duplicates_path = f'{root_path}/excel_files/regiones/no_duplicados'
+depurated_duplicates_path = f'{root_path}/excel_files/depurado'
 
-united_depurated_path = f'{root_path}/excel_files/completos_unificados'
+united_duplicates_path = f'{root_path}/excel_files/output'
+
+
+
 
 
 
