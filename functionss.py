@@ -108,12 +108,17 @@ class document_handling:
             
         self.book = pd.read_excel(f'{self.excel_document}')
         
+        
+        ## REMOVE ALL NaN values from the book
+        self.book = self.book.fillna("")
+        
+
         # SELECT RANGE AND CHOOSE KEY COLUMN WITH DUPLICATE RECORDS #
         print("[SELECT RANGE AND CHOOSE KEY COLUMN WITH DUPLICATE RECORDS (please insert values with spaces)]\n")
         for index, col in enumerate(self.book.columns):
             print(f"[{index}] {col}")
 
-        key_column_id = input("\n>>>")
+        key_column_id = int(input("\n>>>"))
 
 
 
@@ -123,16 +128,63 @@ class document_handling:
             print(f"[{index}] {col}")
         
 
+        key_column = self.book.iloc[:, key_column_id]
         columns_to_merge = input("\n>>>")
         columns_to_merge = columns_to_merge.split()
 
+        columns_to_merge_as_dict = {}
+        for col in columns_to_merge:
+
+            # Here we add the column names to the created dictionary (We have to do this in order to pass it to agg())
+            columns_to_merge_as_dict.update({f"{self.book.iloc[:, int(col)].name}":list})
+
+
         
-        key_column = self.book.iloc[:, key_column_id]
-
-        for key, value in key_column.iteritems():
-            print(key, value)
+        ## 
+        df_with_curated_values = self.book.groupby(key_column.name,as_index=False).agg(columns_to_merge_as_dict)
 
 
+
+        # REMOVER: REMOVE BLANK SPACES, DASHES, and other useless elements
+        def char_remover(col_name, char_to_remove):
+            for entry in df_with_curated_values[col_name]:
+
+                for index, item in enumerate(entry):
+
+                    if not isinstance(item, int):
+                        entry[index] = entry[index].replace(char_to_remove, '')
+                
+                        if item == '':
+                            entry.pop(index)
+
+                        elif item == char_to_remove:
+                            entry.pop(index)
+
+        ### Develop a way to only remove certain characters on very specific columns
+        ### Such as a TLF columns, and ommit the other columns, and develop a prompt for
+        ### whether or not use char_remover()
+        for column in columns_to_merge_as_dict:
+            char_remover(column, '-')
+
+
+
+
+        ## CURATE COLUMN DUPLICATE VALUES 
+        def curate_col(col):
+
+            for index, _ in enumerate(col):
+                # print(index)
+                col[index] = '|'.join(map(str,col[index]))
+
+
+       
+        for col_index in columns_to_merge:
+            curate_col(df_with_curated_values[self.book.iloc[:, int(col_index)].name])
+
+
+
+        # print(self.book.iloc[:, 11].name)
+        print(df_with_curated_values)
 
 
         # for id in columns_to_merge:
